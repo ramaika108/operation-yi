@@ -57,10 +57,10 @@ const GeneralInfo:FunctionComponent<Props> = ({company}) => {
                         <div className="data-item">
                             <div className="data-item__label">Договор:</div>
                             {editMode ?
-                            <>
-                                <input type="number" defaultValue={company.contract.no}/>
-                                <input type="date" defaultValue={dateValue}/>
-                            </>
+                                <div>
+                                    <input type="number" defaultValue={company.contract.no}/>
+                                    <input type="date" defaultValue={dateValue}/>
+                                </div>
                             :
                             <p className="data-item__text">{company.contract.no} от {contractDate}</p>
                             }
@@ -76,14 +76,14 @@ const GeneralInfo:FunctionComponent<Props> = ({company}) => {
                         <div className="data-item">
                             <div className="data-item__label">Тип:</div>
                             {editMode ?
-                            <>
+                            <div>
                                 <label>Агент
                                     <input type="checkbox" defaultChecked={company.type[0]==='agent'}/>
                                 </label>
                                 <label>Подрядчик
                                     <input type="checkbox" defaultChecked={company.type[1]==='contractor'}/>
                                 </label>
-                            </>
+                            </div>
                             :
                             <p className="data-item__text">Агент, Подрядчик</p>
                             }

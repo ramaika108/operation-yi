@@ -3,6 +3,7 @@ import linkImg from '../images/dist/Linked.svg';
 import reloadImg from '../images/dist/Rotation.svg';
 import deleteImg from '../images/dist/Delete.svg';
 import editImg from '../images/dist/Edit.svg';
+import saveImg from '../images/dist/Save.svg';
 import {FunctionComponent, useEffect, useState} from 'react';
 import {CompanyInterface} from '../types';
 import GeneralInfo from './GeneralInfo';
@@ -34,6 +35,22 @@ const Main:FunctionComponent<AuthTokenType> = ({authToken}) => {
         getCompany()
     }, [])
 
+    const [editMode, setEditMode] = useState(false)
+
+    const toggleEditMode = () => {
+        if (editMode){
+            setEditMode(false)
+            updateData()
+        }
+        else {
+            setEditMode(true)
+        }
+    }
+
+    const updateData = () => {
+        return 1
+    }
+
 
     return (
         <main>
@@ -51,8 +68,15 @@ const Main:FunctionComponent<AuthTokenType> = ({authToken}) => {
 
             <div className="main-block">
                 <div className="main-block__title">
-                    <h2>{company && company.shortName}</h2>
-                    <img src={editImg} alt="Редактировать" />
+                            {editMode ?
+                            <div className="label__container">
+                                <label className="label_floating" htmlFor="shortName">Короткое название</label>
+                                <input type="text" defaultValue={company?.shortName} id="shortName" className="short-name-input"/>
+                            </div>
+                            :
+                            <h2>{company && company.shortName}</h2>
+                            }
+                    <img src={editMode ? saveImg : editImg} alt="Редактировать" onClick={toggleEditMode}/>
                 </div>
 
                 {company && <GeneralInfo company={company} />}
