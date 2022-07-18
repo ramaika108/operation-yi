@@ -15,7 +15,7 @@ const AttachedPohotos:FunctionComponent<Props> = ({photos, authToken}) => {
                 <h3>ПРИЛОЖЕННЫЕ ФОТО</h3>
             </div>
             {photos.map(photo => (
-                <div className="photo">
+                <div className="photo" key={photo.filepath}>
                     <img src={photo.thumbpath} alt="Фотография" className="photo__img" />
                     <p className="photo__name">{photo.name}</p>
                     <p className="photo__date">11 июня 2018</p>

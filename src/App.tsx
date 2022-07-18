@@ -13,11 +13,13 @@ function App() {
         let token = res.headers.get("Authorization")
         if (token){
             setAuthToken(token);
+            console.log(token)
         }
     }
+
     useEffect( () => {
         getAuthToken()
-    }, [authToken])
+    }, [])
 
   return (
     <>

@@ -10,6 +10,7 @@ type Props = {
 const ContactInfo:FunctionComponent<Props> = ({contactId, authToken}) => {
 
     const [contact, SetContact] = useState<ContactInterface>()
+
     const getContact = async () => {
         let res = await fetch(`/contacts/${contactId}`, {
             headers: {
@@ -49,7 +50,7 @@ const ContactInfo:FunctionComponent<Props> = ({contactId, authToken}) => {
                 </div>
                 <div className="data-item">
                     <div className="data-item__label">Эл. почта:</div>
-                    <p className="data-item__text data-item__text_type_mail">{contact?.email}</p>
+                    <p className="data-item__text data-item__text_type_mail"><a href={'mailto:' + contact?.email}>{contact?.email}</a></p>
                 </div>
             </div>
         </div>
