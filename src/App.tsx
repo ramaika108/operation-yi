@@ -3,6 +3,7 @@ import './styles/main.sass';
 import Aside from './components/Aside';
 import Main from './components/Main';
 import Footer from './components/Footer';
+import {AuthContext} from './context/AuthContext';
 
 function App() {
 
@@ -16,16 +17,17 @@ function App() {
             console.log(token)
         }
     }
-
-    useEffect( () => {
+    useEffect(() => {
         getAuthToken()
     }, [])
 
   return (
     <>
-        <Aside />
-        {authToken &&  <Main authToken={authToken}/>}
-        <Footer />
+        <AuthContext.Provider value={authToken!}>
+            <Aside />
+            <Main />
+            <Footer />
+        </AuthContext.Provider>
     </>
   );
 }

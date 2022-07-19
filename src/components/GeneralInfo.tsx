@@ -85,7 +85,13 @@ const GeneralInfo:FunctionComponent<Props> = ({company}) => {
                                 </label>
                             </div>
                             :
-                            <p className="data-item__text">Агент, Подрядчик</p>
+                            <p className="data-item__text">{company.type.map((cType:string, i:number) => {
+                                let formatedType:string;
+                                if (cType === 'agent')  formatedType = 'Агент'
+                                else if (cType === 'contractor') formatedType = ' Подрядчик'
+                                if (i + 1 !== company.type.length) formatedType! += ', '
+                                return formatedType!
+                            })}</p>
                             }
                         </div>
                     </div>
