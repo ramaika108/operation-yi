@@ -1,8 +1,9 @@
 import React, {FunctionComponent, useContext, useEffect, useState} from 'react';
 import {AuthContext} from '../context/AuthContext';
+import {ContactInterface} from '../types';
+
 import editImg from '../images/dist/Edit.svg';
 import saveImg from '../images/dist/Save.svg';
-import {ContactInterface} from '../types';
 
 type Props = {
     contactId:number
@@ -12,6 +13,7 @@ const ContactInfo:FunctionComponent<Props> = ({contactId}) => {
     const authToken = useContext(AuthContext)
 
     const [contact, SetContact] = useState<ContactInterface>()
+    const [editMode, setEditMode] = useState(false)
 
     const getContact = async () => {
         let res = await fetch(`/contacts/${contactId}`, {
@@ -31,17 +33,6 @@ const ContactInfo:FunctionComponent<Props> = ({contactId}) => {
         }
     }, [authToken])
 
-    let fio;
-    let formatedPhone;
-    if (contact){
-        let cp = contact.phone
-
-        fio = `${contact.lastname} ${contact.firstname} ${contact.patronymic}`
-        formatedPhone = `+${cp.slice(0, 1)} (${cp.slice(1,4)}) ${cp.slice(4, 7)}-${cp.slice(7, 9)}-${cp.slice(9, 11)}`
-    }
-
-    const [editMode, setEditMode] = useState(false)
-
     const toggleEditMode = () => {
         if (editMode){
             setEditMode(false)
@@ -51,10 +42,6 @@ const ContactInfo:FunctionComponent<Props> = ({contactId}) => {
             setEditMode(true)
         }
     }
-
-    const contactFio = React.createRef<HTMLInputElement>()
-    const contactPhone = React.createRef<HTMLInputElement>()
-    const contactEmail = React.createRef<HTMLInputElement>()
 
     const updateData = async () => {
         let sendFio:string[] = [];
@@ -79,6 +66,20 @@ const ContactInfo:FunctionComponent<Props> = ({contactId}) => {
         if (!res.error) SetContact(res)
         console.log('update happened, ', res)
 }
+
+    //Input data extraction and formating START
+    let fio;
+    let formatedPhone;
+    if (contact){
+        let cp = contact.phone
+
+        fio = `${contact.lastname} ${contact.firstname} ${contact.patronymic}`
+        formatedPhone = `+${cp.slice(0, 1)} (${cp.slice(1,4)}) ${cp.slice(4, 7)}-${cp.slice(7, 9)}-${cp.slice(9, 11)}`
+    }
+    const contactFio = React.createRef<HTMLInputElement>()
+    const contactPhone = React.createRef<HTMLInputElement>()
+    const contactEmail = React.createRef<HTMLInputElement>()
+
 
     return(
 
