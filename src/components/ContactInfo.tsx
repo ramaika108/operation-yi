@@ -1,4 +1,4 @@
-import {FunctionComponent, useContext, useEffect, useState} from 'react';
+import React, {FunctionComponent, useContext, useEffect, useState} from 'react';
 import {AuthContext} from '../context/AuthContext';
 import editImg from '../images/dist/Edit.svg';
 import saveImg from '../images/dist/Save.svg';
@@ -52,9 +52,33 @@ const ContactInfo:FunctionComponent<Props> = ({contactId}) => {
         }
     }
 
-    const updateData = () => {
-        return 1
-    }
+    const contactFio = React.createRef<HTMLInputElement>()
+    const contactPhone = React.createRef<HTMLInputElement>()
+    const contactEmail = React.createRef<HTMLInputElement>()
+
+    const updateData = async () => {
+        let sendFio:string[] = [];
+        if (contactFio.current) {
+            sendFio = contactFio.current.value.split(' ')
+        }
+        let req = await fetch('/contacts/16/', {
+            headers: {
+                "Authorization": authToken,
+                "Content-Type": "application/json"
+            },
+            method: 'PATCH',
+            body: JSON.stringify({
+                lastname: sendFio[0],
+                firstname: sendFio[1],
+                patronymic: sendFio[2],
+                phone: contactPhone.current?.value,
+                email: contactEmail.current?.value,
+            })
+        })
+        let res = await req.json()
+        if (!res.error) SetContact(res)
+        console.log('update happened, ', res)
+}
 
     return(
 
@@ -68,7 +92,7 @@ const ContactInfo:FunctionComponent<Props> = ({contactId}) => {
                 <div className="data-item">
                     <div className="data-item__label">ФИО:</div>
                         {editMode ?
-                        <input type="text" defaultValue={fio}/>
+                        <input type="text" defaultValue={fio} ref={contactFio}/>
                         :
                         <p className="data-item__text">{fio}</p>
                         }
@@ -76,7 +100,7 @@ const ContactInfo:FunctionComponent<Props> = ({contactId}) => {
                 <div className="data-item">
                     <div className="data-item__label">Телефон:</div>
                         {editMode ?
-                        <input type="text" defaultValue={contact?.phone}/>
+                        <input type="text" defaultValue={contact?.phone} ref={contactPhone}/>
                         :
                         <p className="data-item__text">{formatedPhone}</p>
                         }
@@ -84,7 +108,7 @@ const ContactInfo:FunctionComponent<Props> = ({contactId}) => {
                 <div className="data-item">
                     <div className="data-item__label">Эл. почта:</div>
                         {editMode ?
-                        <input type="text" defaultValue={contact?.email}/>
+                        <input type="text" defaultValue={contact?.email} ref={contactEmail}/>
                         :
                         <p className="data-item__text data-item__text_type_mail"><a href={'mailto:' + contact?.email}>{contact?.email}</a></p>
                         }

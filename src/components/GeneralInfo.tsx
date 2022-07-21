@@ -1,41 +1,80 @@
-import {FunctionComponent, useState} from 'react';
+import React, {useContext, useState} from 'react';
+import {AuthContext} from '../context/AuthContext';
 import editImg from '../images/dist/Edit.svg';
 import saveImg from '../images/dist/Save.svg';
 import {CompanyInterface} from '../types';
 
 type Props = {
     company:CompanyInterface
+    setCompany:Function
 }
 
-const GeneralInfo:FunctionComponent<Props> = ({company}) => {
+const GeneralInfo = ({company, setCompany}:Props) => {
     
+    const authToken = useContext(AuthContext)
     const [editMode, setEditMode] = useState(false)
 
     const toggleEditMode = () => {
-        if (editMode){
-            setEditMode(false)
+        setEditMode(!editMode)
+        if (editMode) {
             updateData()
-        }
-        else {
-            setEditMode(true)
         }
     }
 
-    const updateData = () => {
-        return 1
-    }
+    const companyName = React.createRef<HTMLInputElement>()
+    const contractNo = React.createRef<HTMLInputElement>()
+    const contractDate = React.createRef<HTMLInputElement>()
+    const companyEntity = React.createRef<HTMLInputElement>()
+    const companyAgent = React.createRef<HTMLInputElement>()
+    const companyContractor = React.createRef<HTMLInputElement>()
+
+    const updateData = async () => {
+        getCompanyType()
+        let req = await fetch('/companies/12/', {
+            headers: {
+                "Authorization": authToken,
+                "Content-Type": "application/json"
+            },
+            method: 'PATCH',
+            body: JSON.stringify({
+                name: companyName.current?.value,
+                contract: {
+                    no: contractNo.current?.value,
+                    //issue_date: contractDate.current?.value + 'T00:00:00Z'
+                    //issue_date: contractDate.current?.valueAsDate
+                    //issue_date: "2015-03-12T00:00:00Z"
+                },
+                businessEntity: companyEntity.current?.value,
+                'type': companyType,
+            })
+        })
+        let res = await req.json()
+        if (!res.error) setCompany(res)
+        console.log('update happened, ', res)
+}
+
 
     const padTo2Digits = (num:number) => {
         return num.toString().padStart(2, '0');
     }
 
     const tmpDate = new Date(Date.parse(company.contract.issue_date));
-    const contractDate = tmpDate.toLocaleDateString("ru-RU");
+    const formatedDate = tmpDate.toLocaleDateString("ru-RU");
     const dateValue =   [
       tmpDate.getFullYear(),
       padTo2Digits(tmpDate.getMonth() + 1),
       padTo2Digits(tmpDate.getDate()),
     ].join('-')
+
+    let companyType:string[] = [];
+    const getCompanyType = () => {
+        if (companyAgent.current?.checked) {
+            companyType.push('agent')
+        }
+        if (companyContractor.current?.checked) {
+            companyType.push('contractor')
+        }
+    }
 
     return(
 
@@ -49,7 +88,7 @@ const GeneralInfo:FunctionComponent<Props> = ({company}) => {
                         <div className="data-item">
                             <div className="data-item__label">Полное название:</div>
                             {editMode ?
-                            <input type="text" defaultValue={company.name}/>
+                            <input type="text"  defaultValue={company.name} ref={companyName}/>
                             :
                             <p className="data-item__text">{company.name}</p>
                             }
@@ -58,17 +97,17 @@ const GeneralInfo:FunctionComponent<Props> = ({company}) => {
                             <div className="data-item__label">Договор:</div>
                             {editMode ?
                                 <div>
-                                    <input type="number" defaultValue={company.contract.no}/>
-                                    <input type="date" defaultValue={dateValue}/>
+                                    <input type="number" defaultValue={company.contract.no} ref={contractNo}/>
+                                    <input type="date" defaultValue={dateValue} ref={contractDate}/>
                                 </div>
                             :
-                            <p className="data-item__text">{company.contract.no} от {contractDate}</p>
+                            <p className="data-item__text">{company.contract.no} от {formatedDate}</p>
                             }
                         </div>
                         <div className="data-item">
                             <div className="data-item__label">Форма:</div>
                             {editMode ?
-                            <input type="text" defaultValue={company.businessEntity}/>
+                            <input type="text" defaultValue={company.businessEntity} ref={companyEntity}/>
                             :
                             <p className="data-item__text">{company.businessEntity}</p>
                             }
@@ -78,18 +117,24 @@ const GeneralInfo:FunctionComponent<Props> = ({company}) => {
                             {editMode ?
                             <div>
                                 <label>Агент
-                                    <input type="checkbox" defaultChecked={company.type[0]==='agent'}/>
+                                    <input type="checkbox" defaultChecked={company.type.indexOf('agent') !== -1} value="agent" ref={companyAgent}/>
                                 </label>
                                 <label>Подрядчик
-                                    <input type="checkbox" defaultChecked={company.type[1]==='contractor'}/>
+                                    <input type="checkbox" defaultChecked={company.type.indexOf('contractor') !== -1} value="contractor" ref={companyContractor}/>
                                 </label>
                             </div>
                             :
                             <p className="data-item__text">{company.type.map((cType:string, i:number) => {
                                 let formatedType:string;
-                                if (cType === 'agent')  formatedType = 'Агент'
-                                else if (cType === 'contractor') formatedType = ' Подрядчик'
-                                if (i + 1 !== company.type.length) formatedType! += ', '
+
+                                if (cType === 'agent') {
+                                    formatedType = 'Агент'
+                                } else if (cType === 'contractor') {
+                                    formatedType = ' Подрядчик'
+                                }
+                                if (i + 1 !== company.type.length) {
+                                    formatedType! += ', '
+                                }
                                 return formatedType!
                             })}</p>
                             }

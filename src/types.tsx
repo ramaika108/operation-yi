@@ -6,6 +6,7 @@ export interface CompanyInterface  {
     'type':string[]
     contactId:number
     photos:PhotoType[]
+    id:string
 }
 
 export interface ContactInterface {

@@ -1,4 +1,5 @@
-import {ChangeEvent, FunctionComponent, useRef, useState} from 'react';
+import {ChangeEvent, FunctionComponent, useContext, useRef, useState} from 'react';
+import {AuthContext} from '../context/AuthContext';
 import {PhotoType} from '../types';
 import Photo from './Photo';
 
@@ -9,6 +10,7 @@ type Props = {
 
 const AttachedPohotos:FunctionComponent<Props> = ({photos}) => {
     const fileInput = useRef<HTMLInputElement>(null)
+    const authToken = useContext(AuthContext)
 
     const handleAddButtonClick = () => {
         if (fileInput.current !== null) {
@@ -18,17 +20,45 @@ const AttachedPohotos:FunctionComponent<Props> = ({photos}) => {
     const removePhoto = (photo:string) => {
         return 1
     }
+    let newPhoto:PhotoType;
     const handleFileInput = (e:any) => {
         if (e !== null) {
-            let newPhoto = {
+            newPhoto = {
                 name: e.target.value.split('\\').pop(),
                 thumbpath: URL.createObjectURL(e.target.files[0]),
-                filepath: '',
+                filepath: e.target.files[0],
+                //filepath: '',
             }
             setNewPhotos([...newPhotos, newPhoto])
+            updateData()
         }
     }
     const [newPhotos, setNewPhotos] = useState<PhotoType[]>(photos)
+
+    const updateData = async () => {
+    console.log(newPhoto.filepath)
+        const data = new FormData();
+        //data.append('file', newPhoto.filepath)
+        //data.append('file', fileInput.current.files[0])
+        if (fileInput.current?.files) {
+            data.append('file', fileInput.current?.files[0])
+        }
+        let req = await fetch('/companies/12/image', {
+            headers: {
+                "Authorization": authToken,
+                "Content-Type": "multipart/form-data"
+            },
+            method: 'POST',
+            body: data
+            //body: newPhoto.filepath
+            //body: JSON.stringify({
+                //file: newPhoto.filepath
+            //})
+        })
+        let res = await req.json()
+        if (!res.error) setNewPhotos(res)
+        console.log('update happened, ', res)
+    }
 
     return(
         <div className="main-block__info">
@@ -36,7 +66,7 @@ const AttachedPohotos:FunctionComponent<Props> = ({photos}) => {
                 <h3>ПРИЛОЖЕННЫЕ ФОТО</h3>
             </div>
             {newPhotos.map(photo => (
-                <Photo photo={photo} key={photo.filepath} />
+                <Photo photo={photo} key={photo.thumbpath} setNewPhotos={setNewPhotos} newPhotos={newPhotos} />
             ))}
             <div className="button" onClick={handleAddButtonClick}>
                 <svg width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M1.9 8a.6.6 0 01.6-.6h11a.6.6 0 110 1.2h-11a.6.6 0 01-.6-.6z" fill="#82B284"/><path fillRule="evenodd" clipRule="evenodd" d="M8 1.9a.6.6 0 01.6.6v11a.6.6 0 11-1.2 0v-11a.6.6 0 01.6-.6z" fill="#82B284"/></svg>

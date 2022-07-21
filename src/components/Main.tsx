@@ -1,23 +1,33 @@
-import backImg from '../images/dist/Long.svg';
-import linkImg from '../images/dist/Linked.svg';
-import reloadImg from '../images/dist/Rotation.svg';
-import deleteImg from '../images/dist/Delete.svg';
-import editImg from '../images/dist/Edit.svg';
-import saveImg from '../images/dist/Save.svg';
-
 import React, {FunctionComponent, useContext, useEffect, useState} from 'react';
-import {CompanyInterface} from '../types';
+import MicroModal from 'micromodal';
+
+import Header from './Header';
 import GeneralInfo from './GeneralInfo';
 import ContactInfo from './ContactInfo';
 import AttachedPohotos from './Photos';
+
 import {AuthContext} from '../context/AuthContext';
+import {CompanyInterface} from '../types';
+
+import editImg from '../images/dist/Edit.svg';
+import saveImg from '../images/dist/Save.svg';
+import ModalWrapper from './ModalWrapper';
+import DeleteModal from './DeleteModal';
+
+        MicroModal.init({
+        openTrigger: 'data-micromodal-open',
+        closeTrigger: 'data-micromodal-close',
+        disableScroll: true,
+        disableFocus: true,
+        awaitOpenAnimation: true,
+        awaitCloseAnimation: true
+        })
 
 
 const Main:FunctionComponent = () => {
 
-    const [company, SetCompany] = useState<CompanyInterface>()
     const authToken = useContext(AuthContext)
-    const shortName = React.createRef<HTMLInputElement>()
+    const [company, setCompany] = useState<CompanyInterface>()
     
     const getCompany = async () => {
         let res = await fetch('/companies/12', {
@@ -27,7 +37,7 @@ const Main:FunctionComponent = () => {
             }
         });
         let data = await res.json()
-        SetCompany(data)
+        setCompany(data)
         console.log(data)
     }
 
@@ -37,71 +47,61 @@ const Main:FunctionComponent = () => {
         }
     }, [authToken])
 
-    const [editMode, setEditMode] = useState(false)
 
-    const toggleEditMode = () => {
-        if (editMode){
-            setEditMode(false)
+    const [editMode, setEditMode] = useState(false)
+    const shortName = React.createRef<HTMLInputElement>()
+
+    const ToggleEditMode = async () => {
+        setEditMode(!editMode)
+        if (editMode) {
             updateData()
-        }
-        else {
-            setEditMode(true)
         }
     }
 
     const updateData = async () => {
-        let req = await fetch('/companies/12/', {
-            headers: {
-                "Authorization": authToken,
-                "Content-Type": "application/json"
-            },
-            method: 'PATCH',
-            body: JSON.stringify({
-                shortName: shortName.current?.value
-            })
+    let req = await fetch('/companies/12/', {
+        headers: {
+            "Authorization": authToken,
+            "Content-Type": "application/json"
+        },
+        method: 'PATCH',
+        body: JSON.stringify({
+            shortName: shortName.current?.value
         })
-        let res = await req.json()
-        SetCompany(res)
-        console.log('update happened, ', res)
-    }
+    })
+    let res = await req.json()
+    if (!res.error) setCompany(res)
+    console.log('update happened, ', res)
+}
 
 
     return (
         <main>
-            <header>
-                <div className="header__content-wrapper">
-                    <div className="back-button">
-                        <img src={backImg} alt="Назад" />
-                        <p>К СПИСКУ ЮРИДИЧЕСКИХ ЛИЦ</p>
-                    </div>
-                    <div className="actions">
-                        <img src={linkImg} alt="Ссылка" />
-                        <img src={reloadImg} alt="Перезагрузить" />
-                        <img src={deleteImg} alt="Удалить" />
-                    </div>
-                </div>
-            </header>
+            <Header />
 
             <div className="main-block">
                 <div className="main-block__title">
-                            {editMode ?
-                            <div className="label__container">
-                                <label className="label_floating" htmlFor="shortName">Короткое название</label>
-                                <input type="text" defaultValue={company?.shortName} id="shortName" className="input_short-name" ref={shortName} autoComplete="off" />
-                            </div>
-                            :
-                            <h2>{company && company.shortName}</h2>
-                            }
-                    <img src={editMode ? saveImg : editImg} alt="Редактировать" onClick={toggleEditMode}/>
+                    {editMode ?
+                        <div className="label__container">
+                            <label className="label_floating" htmlFor="shortName">Короткое название</label>
+                            <input type="text" defaultValue={company?.shortName} id="shortName" className="input_short-name" ref={shortName} autoComplete="off" />
+                        </div>
+                    :
+                        <h2>{company && company.shortName}</h2>
+                    }
+                    <img src={editMode ? saveImg : editImg} alt="Редактировать" onClick={ToggleEditMode}/>
                 </div>
 
-                {company && <GeneralInfo company={company} />}
+                {company && <GeneralInfo company={company} setCompany={setCompany} />}
 
                 {company && <ContactInfo contactId={company.contactId} />}
 
                 {company && <AttachedPohotos photos={company.photos} />}
 
             </div>
+            <ModalWrapper>
+                {company && <DeleteModal id={company.id}/>}
+            </ModalWrapper>
         </main>
 
     )}
