@@ -14,14 +14,6 @@ import saveImg from '../images/dist/Save.svg';
 import ModalWrapper from './ModalWrapper';
 import DeleteModal from './DeleteModal';
 
-        MicroModal.init({
-        openTrigger: 'data-micromodal-open',
-        closeTrigger: 'data-micromodal-close',
-        disableScroll: true,
-        disableFocus: true,
-        awaitOpenAnimation: true,
-        awaitCloseAnimation: true
-        })
 
 
 const Main:FunctionComponent = () => {
@@ -46,6 +38,17 @@ const Main:FunctionComponent = () => {
             getCompany()
         }
     }, [authToken])
+
+    useEffect(() => {
+        MicroModal.init({
+        openTrigger: 'data-micromodal-open',
+        closeTrigger: 'data-micromodal-close',
+        disableScroll: true,
+        disableFocus: true,
+        awaitOpenAnimation: true,
+        awaitCloseAnimation: true
+        })
+    })
 
 
     const [editMode, setEditMode] = useState(false)
