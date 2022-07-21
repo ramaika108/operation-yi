@@ -1,4 +1,4 @@
-import {ChangeEvent, FunctionComponent, useContext, useRef, useState} from 'react';
+import {FunctionComponent, useContext, useRef, useState} from 'react';
 import {AuthContext} from '../context/AuthContext';
 import {PhotoType} from '../types';
 import Photo from './Photo';
@@ -17,47 +17,30 @@ const AttachedPohotos:FunctionComponent<Props> = ({photos}) => {
             fileInput.current.click()
         }
     }
-    const removePhoto = (photo:string) => {
-        return 1
-    }
+
     let newPhoto:PhotoType;
+
     const handleFileInput = (e:any) => {
         if (e !== null) {
-            newPhoto = {
-                name: e.target.value.split('\\').pop(),
-                thumbpath: URL.createObjectURL(e.target.files[0]),
-                filepath: e.target.files[0],
-                //filepath: '',
-            }
-            setNewPhotos([...newPhotos, newPhoto])
             updateData()
         }
     }
     const [newPhotos, setNewPhotos] = useState<PhotoType[]>(photos)
 
     const updateData = async () => {
-    console.log(newPhoto.filepath)
-        const data = new FormData();
-        //data.append('file', newPhoto.filepath)
-        //data.append('file', fileInput.current.files[0])
+        const body = new FormData();
         if (fileInput.current?.files) {
-            data.append('file', fileInput.current?.files[0])
+            body.append('file', fileInput.current?.files[0])
         }
         let req = await fetch('/companies/12/image', {
             headers: {
                 "Authorization": authToken,
-                "Content-Type": "multipart/form-data"
             },
             method: 'POST',
-            body: data
-            //body: newPhoto.filepath
-            //body: JSON.stringify({
-                //file: newPhoto.filepath
-            //})
+            body,
         })
         let res = await req.json()
-        if (!res.error) setNewPhotos(res)
-        console.log('update happened, ', res)
+        if (!res.error) setNewPhotos([...newPhotos, res])
     }
 
     return(
