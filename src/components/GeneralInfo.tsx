@@ -34,9 +34,7 @@ const GeneralInfo = ({company, setCompany}:Props) => {
                 name: companyName.current?.value,
                 contract: {
                     no: contractNo.current?.value,
-                    //issue_date: contractDate.current?.value + 'T00:00:00Z'
-                    //issue_date: contractDate.current?.valueAsDate
-                    //issue_date: "2015-03-12T00:00:00Z"
+                    issue_date: contractDate.current?.valueAsDate
                 },
                 businessEntity: companyEntity.current?.value,
                 'type': companyType,
